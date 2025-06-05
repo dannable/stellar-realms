@@ -12,3 +12,6 @@ python app.py
 ```
 
 Then open `http://localhost:5000` in your browser.
+
+Players are stored in an SQLite database `stellar_realms.db`. New players
+register with a password and can log in using the form on the front page.
