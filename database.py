@@ -2,7 +2,7 @@ import sqlite3
 import hashlib
 from typing import Dict
 
-from models import Player, ships
+from models import Player, Sector, ships
 
 DB_PATH = 'stellar_realms.db'
 
@@ -31,6 +31,12 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             password TEXT NOT NULL
+        )'''
+    )
+    c.execute(
+        '''CREATE TABLE IF NOT EXISTS sectors (
+            id INTEGER PRIMARY KEY,
+            connections TEXT NOT NULL
         )'''
     )
     c.execute('SELECT COUNT(*) FROM admins')
@@ -99,6 +105,32 @@ def load_players() -> Dict[int, Player]:
     return players
 
 
+def save_sectors(sectors: Dict[int, Sector]):
+    """Store sectors and their connections in the database."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('DELETE FROM sectors')
+    for sector in sectors.values():
+        conns = ','.join(str(n) for n in sector.connections)
+        c.execute('INSERT INTO sectors (id, connections) VALUES (?, ?)', (sector.id, conns))
+    conn.commit()
+    conn.close()
+
+
+def load_sectors() -> Dict[int, Sector]:
+    """Load sectors from the database."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('SELECT id, connections FROM sectors')
+    rows = c.fetchall()
+    conn.close()
+    sectors: Dict[int, Sector] = {}
+    for row in rows:
+        connections = [int(x) for x in row[1].split(',')] if row[1] else []
+        sectors[row[0]] = Sector(id=row[0], connections=connections)
+    return sectors
+
+
 def update_player(player: Player):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -159,6 +191,7 @@ def reset_db():
     c = conn.cursor()
     c.execute('DROP TABLE IF EXISTS players')
     c.execute('DROP TABLE IF EXISTS admins')
+    c.execute('DROP TABLE IF EXISTS sectors')
     conn.commit()
     conn.close()
     init_db()
