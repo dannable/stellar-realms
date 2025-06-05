@@ -26,6 +26,19 @@ def init_db():
             wits INTEGER NOT NULL
         )'''
     )
+    c.execute(
+        '''CREATE TABLE IF NOT EXISTS admins (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            password TEXT NOT NULL
+        )'''
+    )
+    c.execute('SELECT COUNT(*) FROM admins')
+    if c.fetchone()[0] == 0:
+        c.execute(
+            'INSERT INTO admins (name, password) VALUES (?, ?)',
+            ('admin', hash_password('admin')),
+        )
     conn.commit()
     conn.close()
 
@@ -132,10 +145,20 @@ def verify_credentials(name: str, password: str) -> Player | None:
         )
     return None
 
+
+def verify_admin_credentials(name: str, password: str) -> bool:
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('SELECT password FROM admins WHERE name=?', (name,))
+    row = c.fetchone()
+    conn.close()
+    return bool(row) and row[0] == hash_password(password)
+
 def reset_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('DROP TABLE IF EXISTS players')
+    c.execute('DROP TABLE IF EXISTS admins')
     conn.commit()
     conn.close()
     init_db()

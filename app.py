@@ -1,4 +1,12 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    jsonify,
+    session,
+)
 from models import GameMap, Player, ships
 import random
 from database import (
@@ -7,17 +15,33 @@ from database import (
     create_player,
     update_player,
     verify_credentials,
+    verify_admin_credentials,
     reset_db,
 )
 
 app = Flask(__name__)
+app.secret_key = 'change-me'
 
 game_map = GameMap()
 init_db()
 players = load_players()
 
+
+def admin_required(func):
+    """Decorator to restrict routes to logged-in admin users."""
+    from functools import wraps
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not session.get("admin"):
+            return redirect(url_for("admin_login"))
+        return func(*args, **kwargs)
+
+    return wrapper
+
 # admin route to reset game
 @app.route('/admin/reset')
+@admin_required
 def admin_reset():
     global game_map, players
     game_map = GameMap()
@@ -27,8 +51,27 @@ def admin_reset():
 
 # admin interface simple view
 @app.route('/admin')
+@admin_required
 def admin_view():
     return render_template('admin.html', players=players.values())
+
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        password = request.form.get('password', '')
+        if verify_admin_credentials(name, password):
+            session['admin'] = name
+            return redirect(url_for('admin_view'))
+        return 'Invalid credentials', 401
+    return render_template('admin_login.html')
+
+
+@app.route('/admin/logout')
+def admin_logout():
+    session.pop('admin', None)
+    return redirect(url_for('index'))
 
 # register new player
 @app.route('/register', methods=['POST'])
@@ -59,8 +102,15 @@ def login():
     player = verify_credentials(name, password)
     if player:
         players[player.id] = player
+        session['player_id'] = player.id
         return redirect(url_for('index'))
     return 'Invalid credentials', 401
+
+
+@app.route('/logout')
+def logout():
+    session.pop('player_id', None)
+    return redirect(url_for('index'))
 
 # move player to sector
 @app.route('/move/<int:player_id>/<int:dest>', methods=['POST'])

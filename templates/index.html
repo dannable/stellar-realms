@@ -36,6 +36,10 @@
         <button type="submit">Login</button>
     </form>
 
+    <br />
+    {% if session.get('player_id') %}
+    <a href="/logout">Logout</a>
+    {% endif %}
     <a href="/admin">Admin</a>
 </body>
 </html>
