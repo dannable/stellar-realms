@@ -41,7 +41,15 @@ class GameMap:
         self.width = width
         self.height = height
         self.sectors: Dict[int, Sector] = {}
-        self.generate_map()
+
+        # Delay importing to avoid circular dependency with database module
+        from database import load_sectors, save_sectors
+
+        # Attempt to load sectors from the database; generate a new map if none exist
+        self.sectors = load_sectors()
+        if not self.sectors:
+            self.generate_map()
+            save_sectors(self.sectors)
 
     def generate_map(self):
         total = self.width * self.height
