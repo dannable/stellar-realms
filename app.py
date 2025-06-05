@@ -87,9 +87,10 @@ def register():
             'wits': int(request.form.get('wits', 1)),
         }
         ship = ships[0]
-        new_id = create_player(name, password, stats, ship_index=0)
-        p = Player(id=new_id, name=name, sector_id=0, ship=ship,
-                   credits=1000, fuel=ship.fuel_capacity,
+        start_sector = random.choice(list(game_map.sectors.keys()))
+        new_id = create_player(name, password, stats, ship_index=0, sector_id=start_sector)
+        p = Player(id=new_id, name=name, sector_id=start_sector, ship=ship,
+                   credits=1000, fuel=ship.fuel_capacity, upgrades=[], cargo={},
                    iron=stats['iron'], heart=stats['heart'], edge=stats['edge'],
                    shadow=stats['shadow'], wits=stats['wits'])
         players[new_id] = p

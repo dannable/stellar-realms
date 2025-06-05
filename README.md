@@ -15,6 +15,9 @@ Then open `http://localhost:5000` in your browser.
 
 Players are stored in an SQLite database `stellar_realms.db`. New players
 register with a password and can log in using the form on the front page.
+When a player registers they are placed in a random sector on the galactic
+map. The database keeps track of each player's current sector, ship, credits,
+any ship upgrades they have installed and the commodities in their cargo hold.
 
 The map's sectors are also persisted in the same database. Each sector is
 numbered and the space lanes connecting them are stored as simple references to
