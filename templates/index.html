@@ -15,9 +15,13 @@
     {% endfor %}
     </ul>
 
+    {% if current_player %}
+        <p>Logged in as {{ current_player.name }} (<a href="/logout">logout</a>)</p>
+    {% else %}
     <h2>Register New Player</h2>
     <form action="/register" method="post">
         Name: <input name="name" />
+        Password: <input name="password" type="password" />
         <br />
         Iron: <input name="iron" type="number" value="1" />
         Heart: <input name="heart" type="number" value="1" />
@@ -27,6 +31,8 @@
         <br />
         <button type="submit">Create</button>
     </form>
+    <a href="/login">Login</a>
+    {% endif %}
 
     <a href="/admin">Admin</a>
 </body>

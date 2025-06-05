@@ -28,6 +28,7 @@ class Player:
     name: str
     sector_id: int
     ship: Ship
+    password_hash: str
     credits: int = 0
     fuel: int = 0
     iron: int = 1
