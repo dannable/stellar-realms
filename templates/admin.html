@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+<head><title>Admin</title></head>
+<body>
+<h1>Admin Interface</h1>
+<a href="/admin/reset">Reset Game</a>
+<h2>Players</h2>
+<ul>
+{% for p in players %}
+    <li>{{ p.id }} - {{ p.name }} Credits: {{ p.credits }}</li>
+{% else %}
+    <li>No players.</li>
+{% endfor %}
+</ul>
+<a href="/">Back</a>
+</body>
+</html>

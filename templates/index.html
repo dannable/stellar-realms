@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head>
+    <title>Stellar Realms</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <h1>Stellar Realms</h1>
+    <h2>Players</h2>
+    <ul>
+    {% for p in players %}
+        <li>{{ p.id }} - {{ p.name }} (Sector {{ p.sector_id }}, Fuel {{ p.fuel }})</li>
+    {% else %}
+        <li>No players.</li>
+    {% endfor %}
+    </ul>
+
+    <h2>Register New Player</h2>
+    <form action="/register" method="post">
+        Name: <input name="name" />
+        <br />
+        Iron: <input name="iron" type="number" value="1" />
+        Heart: <input name="heart" type="number" value="1" />
+        Edge: <input name="edge" type="number" value="1" />
+        Shadow: <input name="shadow" type="number" value="1" />
+        Wits: <input name="wits" type="number" value="1" />
+        <br />
+        <button type="submit">Create</button>
+    </form>
+
+    <a href="/admin">Admin</a>
+</body>
+</html>
