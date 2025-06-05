@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+    <title>New User Registration</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <h1>Create New Account</h1>
+    <form action="/register" method="post">
+        Captain's Name: <input name="name" />
+        Password: <input name="password" type="password" />
+        <br />
+        Iron: <input name="iron" type="number" value="1" />
+        Heart: <input name="heart" type="number" value="1" />
+        Edge: <input name="edge" type="number" value="1" />
+        Shadow: <input name="shadow" type="number" value="1" />
+        Wits: <input name="wits" type="number" value="1" />
+        <br />
+        <button type="submit">Create Account</button>
+    </form>
+    <p><a href="/login">Back to login</a></p>
+</body>
+</html>
