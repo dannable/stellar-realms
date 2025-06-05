@@ -30,6 +30,8 @@ class Player:
     ship: Ship
     credits: int = 0
     fuel: int = 0
+    upgrades: List[str] = field(default_factory=list)
+    cargo: Dict[str, int] = field(default_factory=dict)
     iron: int = 1
     heart: int = 1
     edge: int = 1

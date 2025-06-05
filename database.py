@@ -1,6 +1,7 @@
 import sqlite3
 import hashlib
-from typing import Dict
+import json
+from typing import Dict, List
 
 from models import Player, Sector, ships
 
@@ -19,6 +20,8 @@ def init_db():
             ship_index INTEGER NOT NULL,
             credits INTEGER NOT NULL,
             fuel INTEGER NOT NULL,
+            upgrades TEXT NOT NULL,
+            cargo TEXT NOT NULL,
             iron INTEGER NOT NULL,
             heart INTEGER NOT NULL,
             edge INTEGER NOT NULL,
@@ -53,19 +56,29 @@ def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
 
 
-def create_player(name: str, password: str, stats: Dict[str, int], ship_index: int) -> int:
+def create_player(
+    name: str,
+    password: str,
+    stats: Dict[str, int],
+    ship_index: int,
+    sector_id: int,
+    upgrades: List[str] | None = None,
+    cargo: Dict[str, int] | None = None,
+) -> int:
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute(
-        'INSERT INTO players (name, password, sector_id, ship_index, credits, fuel, iron, heart, edge, shadow, wits) '
-        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO players (name, password, sector_id, ship_index, credits, fuel, upgrades, cargo, iron, heart, edge, shadow, wits) '
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         (
             name,
             hash_password(password),
-            0,
+            sector_id,
             ship_index,
             1000,
             ships[ship_index].fuel_capacity,
+            json.dumps(upgrades or []),
+            json.dumps(cargo or {}),
             stats['iron'],
             stats['heart'],
             stats['edge'],
@@ -82,7 +95,7 @@ def create_player(name: str, password: str, stats: Dict[str, int], ship_index: i
 def load_players() -> Dict[int, Player]:
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute('SELECT id, name, sector_id, ship_index, credits, fuel, iron, heart, edge, shadow, wits FROM players')
+    c.execute('SELECT id, name, sector_id, ship_index, credits, fuel, upgrades, cargo, iron, heart, edge, shadow, wits FROM players')
     rows = c.fetchall()
     conn.close()
     players: Dict[int, Player] = {}
@@ -95,11 +108,13 @@ def load_players() -> Dict[int, Player]:
             ship=ship,
             credits=row[4],
             fuel=row[5],
-            iron=row[6],
-            heart=row[7],
-            edge=row[8],
-            shadow=row[9],
-            wits=row[10],
+            upgrades=json.loads(row[6]),
+            cargo=json.loads(row[7]),
+            iron=row[8],
+            heart=row[9],
+            edge=row[10],
+            shadow=row[11],
+            wits=row[12],
         )
         players[p.id] = p
     return players
@@ -136,12 +151,14 @@ def update_player(player: Player):
     c = conn.cursor()
     ship_index = ships.index(player.ship)
     c.execute(
-        'UPDATE players SET sector_id=?, ship_index=?, credits=?, fuel=?, iron=?, heart=?, edge=?, shadow=?, wits=? WHERE id=?',
+        'UPDATE players SET sector_id=?, ship_index=?, credits=?, fuel=?, upgrades=?, cargo=?, iron=?, heart=?, edge=?, shadow=?, wits=? WHERE id=?',
         (
             player.sector_id,
             ship_index,
             player.credits,
             player.fuel,
+            json.dumps(player.upgrades),
+            json.dumps(player.cargo),
             player.iron,
             player.heart,
             player.edge,
@@ -157,7 +174,7 @@ def update_player(player: Player):
 def verify_credentials(name: str, password: str) -> Player | None:
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute('SELECT id, name, sector_id, ship_index, credits, fuel, iron, heart, edge, shadow, wits, password FROM players WHERE name=?', (name,))
+    c.execute('SELECT id, name, sector_id, ship_index, credits, fuel, upgrades, cargo, iron, heart, edge, shadow, wits, password FROM players WHERE name=?', (name,))
     row = c.fetchone()
     conn.close()
     if row and row[-1] == hash_password(password):
@@ -169,11 +186,13 @@ def verify_credentials(name: str, password: str) -> Player | None:
             ship=ship,
             credits=row[4],
             fuel=row[5],
-            iron=row[6],
-            heart=row[7],
-            edge=row[8],
-            shadow=row[9],
-            wits=row[10],
+            upgrades=json.loads(row[6]),
+            cargo=json.loads(row[7]),
+            iron=row[8],
+            heart=row[9],
+            edge=row[10],
+            shadow=row[11],
+            wits=row[12],
         )
     return None
 
