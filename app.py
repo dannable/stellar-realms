@@ -74,37 +74,41 @@ def admin_logout():
     return redirect(url_for('index'))
 
 # register new player
-@app.route('/register', methods=['POST'])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    name = request.form.get('name')
-    password = request.form.get('password', '')
-    stats = {
-        'iron': int(request.form.get('iron', 1)),
-        'heart': int(request.form.get('heart', 1)),
-        'edge': int(request.form.get('edge', 1)),
-        'shadow': int(request.form.get('shadow', 1)),
-        'wits': int(request.form.get('wits', 1)),
-    }
-    ship = ships[0]
-    new_id = create_player(name, password, stats, ship_index=0)
-    p = Player(id=new_id, name=name, sector_id=0, ship=ship,
-               credits=1000, fuel=ship.fuel_capacity,
-               iron=stats['iron'], heart=stats['heart'], edge=stats['edge'],
-               shadow=stats['shadow'], wits=stats['wits'])
-    players[new_id] = p
-    return redirect(url_for('index'))
+    if request.method == 'POST':
+        name = request.form.get('name')
+        password = request.form.get('password', '')
+        stats = {
+            'iron': int(request.form.get('iron', 1)),
+            'heart': int(request.form.get('heart', 1)),
+            'edge': int(request.form.get('edge', 1)),
+            'shadow': int(request.form.get('shadow', 1)),
+            'wits': int(request.form.get('wits', 1)),
+        }
+        ship = ships[0]
+        new_id = create_player(name, password, stats, ship_index=0)
+        p = Player(id=new_id, name=name, sector_id=0, ship=ship,
+                   credits=1000, fuel=ship.fuel_capacity,
+                   iron=stats['iron'], heart=stats['heart'], edge=stats['edge'],
+                   shadow=stats['shadow'], wits=stats['wits'])
+        players[new_id] = p
+        return redirect(url_for('login'))
+    return render_template('register.html')
 
 # login existing player
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    name = request.form.get('name')
-    password = request.form.get('password', '')
-    player = verify_credentials(name, password)
-    if player:
-        players[player.id] = player
-        session['player_id'] = player.id
-        return redirect(url_for('index'))
-    return 'Invalid credentials', 401
+    if request.method == 'POST':
+        name = request.form.get('name')
+        password = request.form.get('password', '')
+        player = verify_credentials(name, password)
+        if player:
+            players[player.id] = player
+            session['player_id'] = player.id
+            return redirect(url_for('index'))
+        return 'Invalid credentials', 401
+    return render_template('login.html')
 
 
 @app.route('/logout')
