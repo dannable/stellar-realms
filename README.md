@@ -7,11 +7,14 @@ This is a simple prototype for a browser based multiplayer space trading game in
 Install dependencies and start the development server:
 
 ```bash
-pip install flask
-python app.py
+pip install -r requirements.txt
+flask --app app run
 ```
 
 Then open `http://localhost:5000` in your browser.
+
+You can customize the SQLite database location and Flask secret key using the
+`DB_PATH` and `SECRET_KEY` environment variables.
 
 Players are stored in an SQLite database `stellar_realms.db`. New players
 register with a password and can log in using the form on the front page.
