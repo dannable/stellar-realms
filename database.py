@@ -1,11 +1,13 @@
-import sqlite3
 import hashlib
 import json
+import os
+import sqlite3
 from typing import Dict, List
 
 from models import Player, Sector, ships
 
-DB_PATH = 'stellar_realms.db'
+# Allow overriding the database path via the environment for flexibility
+DB_PATH = os.environ.get("DB_PATH", "stellar_realms.db")
 
 
 def init_db():
